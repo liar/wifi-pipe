@@ -6,11 +6,12 @@ security info) directly in your openbox menu. Click to connect.
 ### Method
 
 This script is called once when the menu is initiated (`sudo wifi-pipe 
-<interface>`); it parses the output of `iwlist <interface> scan` and 
+<interface> [<usertonotify>]`); it parses the output of `iwlist <interface> scan` and 
 formats the xml structure required to display the lines in your menu.
+If usertonotify is specified and you connect to a WIFI network a notification will be sent to `<usertonotify>` once the connection is established.
 
 Each menu entry gets assigned a command which will recall this script 
-(`sudo wifi-pipe <interface> connect <essid>`); when clicked, that 
+(`sudo wifi-pipe <interface> connect <essid> [<usertonotify>]`); when clicked, that 
 command will do the required profile setup and network connection via 
 netcfg.
 

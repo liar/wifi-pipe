@@ -42,6 +42,7 @@ EOF
 # prints the actual xml based on the scan
 print_menu() {
   local essid security quality
+  local the_user=$1
 
   local awkscript='BEGIN { FS=":"; OFS="="; }
     /\<Cell/              { if (essid) print essid, security, quality[2]/quality[3]*100; security="none" }
@@ -62,7 +63,7 @@ print_menu() {
   while IFS='=' read -r essid security quality; do
     echo "<item label=\"$essid ($security) ${quality/.*/}%\">" # trim decimals
     echo '  <action name="Execute">'
-    echo "    <command>sudo $0 $interface connect \"$essid\"</command>"
+    echo "    <command>sudo $0 $interface connect \"$essid\" \"$the_user\"</command>"
     echo '  </action>'
     echo '</item>'
   done < /tmp/networks.tmp
@@ -82,6 +83,7 @@ print_menu() {
 
 connect() {
   local essid="$1" profile_file profile security key
+  local the_user="$2"
 
   # check for an existing profile
   profile_file="$(grep -REl "ESSID=[\"']?$essid[\"']?" "$PROFILE_DIR" | grep -v '~$' | head -1)"
@@ -109,6 +111,10 @@ connect() {
 
       rm "$profile_file"
     fi
+  else
+    if [ "$the_user" != "" ]; then
+      sudo -s -u $the_user zenity --notification --text "Connected to: $essid" --timeout 10
+    fi
   fi
 
   rm /tmp/output.tmp
@@ -125,4 +131,4 @@ if ! ifconfig | grep -q $interface; then
   while ! ifconfig | grep -q $interface; do sleep 1; done
 fi
 
-[[ "$1" = 'connect' ]] && connect "$2" || print_menu
+[[ "$1" = 'connect' ]] && connect "$2" "$3" || print_menu $1
